@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import Terminal, { ColorMode, TerminalInput, TerminalOutput } from 'react-terminal-ui';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import axios from 'axios';
 
 
@@ -16,10 +16,7 @@ function App() {
   const [sensors, setSensors] = useState<React.JSX.Element[]>([]);
   const [plcOutput,setPlcOutput] = useState<React.JSX.Element[]>([]);
   const [binTarget,setBinTarget] = useState('localhost:5000');
-  const [socket,setSocket] = useState(io(`http://localhost:5000/`, {
-    reconnection: true,
-    autoConnect: true,
-  }));
+  const [socket,setSocket] = useState<Socket>();
   useEffect(() => {
     const data = [...bin];
     for (let i = 1; i <= 1; i++) {
@@ -30,14 +27,19 @@ function App() {
     setBins([...data]);
   }, []);
   useEffect(()=>{
-    socket.disconnect();
-    socket.close();
+    if (socket != undefined)
+    {
+      socket.disconnect();
+      socket.close();
+    }
     setSocket( io(`http://${binTarget}/`, {
       reconnection: true,
       autoConnect: true,
     }));
   },[binTarget]);
   useEffect(() => {
+    if (socket == undefined)
+      return;
     socket.off('sensorUpdate');
     socket.on('sensorUpdate', (data: number[]) => {
       setSensors((_)=>{

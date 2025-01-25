@@ -30,6 +30,7 @@ function App() {
     setBins([...data]);
   }, []);
   useEffect(()=>{
+    socket.close();
     setSocket( io(`http://${binTarget}/`, {
       reconnection: true,
       autoConnect: true,

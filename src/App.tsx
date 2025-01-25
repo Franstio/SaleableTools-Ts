@@ -30,7 +30,7 @@ function App() {
   }, []);
   useEffect(() => {
     socket.on('sensorUpdate', (data: number[]) => {
-      setSensors((prev)=>{
+      setSensors((_)=>{
         const outputs : React.JSX.Element[] = [];
 
         if (outputs.length >= 7) {

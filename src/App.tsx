@@ -101,7 +101,7 @@ function App() {
             <fieldset className="border  rounded-md bg-gray-100  border-solid p-3">
               <legend className="text-sm">{b.name}</legend>
               <div className=' grid grid-flow-row grid-cols-2 gap-4'>
-                <input type='text' onBlur={(e)=>setBinTarget(e.target.value)} className='p-3 border rounded-md col-span-2' placeholder='Bin IP/Hostname'/>
+                <input type='text' onChange={(e)=>setBinTarget(e.target.value)} className='p-3 border rounded-md col-span-2' placeholder='Bin IP/Hostname'/>
                 <button type='button' onClick={()=>triggerLock('top','idLockTop')} className='p-2 rounded-md bg-blue-400 text-white'>TOP LOCK</button>
                 <button type='button' onClick={()=>triggerLock('bottom','idLockBottom')} className='p-2 rounded-md bg-orange-400 text-white'>BOTTOM LOCK</button>
                 <button type='button' onClick={()=>triggerLamp('red','on','idLockTop')} className='p-2 rounded-md bg-red-800 text-white'>RED LAMP ON</button>

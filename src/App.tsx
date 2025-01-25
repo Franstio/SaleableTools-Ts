@@ -4,10 +4,7 @@ import Terminal, { ColorMode, TerminalInput, TerminalOutput } from 'react-termin
 import { io } from 'socket.io-client';
 import axios from 'axios';
 
-const socket = io(`http://localhost:5000/`, {
-  reconnection: true,
-  autoConnect: true,
-})
+
 interface SensorModel {
   name: string,
   value: number,
@@ -18,7 +15,11 @@ function App() {
   const [bin, setBins] = useState<{ name: string }[]>([]);
   const [sensors, setSensors] = useState<React.JSX.Element[]>([]);
   const [plcOutput,setPlcOutput] = useState<React.JSX.Element[]>([]);
-
+  const [binTarget,setBinTarget] = useState('localhost:5000');
+  const [socket,setSocket] = useState(io(`http://localhost:5000/`, {
+    reconnection: true,
+    autoConnect: true,
+  }));
   useEffect(() => {
     const data = [...bin];
     for (let i = 1; i <= 1; i++) {
@@ -28,7 +29,14 @@ function App() {
     }
     setBins([...data]);
   }, []);
+  useEffect(()=>{
+    setSocket( io(`http://${binTarget}/`, {
+      reconnection: true,
+      autoConnect: true,
+    }));
+  },[binTarget]);
   useEffect(() => {
+    socket.off('sensorUpdate');
     socket.on('sensorUpdate', (data: number[]) => {
       setSensors((_)=>{
         const outputs : React.JSX.Element[] = [];
@@ -57,9 +65,9 @@ function App() {
         return [...outputs];
       });
     });
-  }, []);
+  }, [socket]);
   const triggerLamp = async (lamp: 'red'|'yellow'|'green',state: 'on'|'off',body: string)=>{
-      const res = await axios.post(`http://localhost:5000/${lamp}lamp${state}`,{
+      const res = await axios.post(`http://${binTarget}/${lamp}lamp${state}`,{
           [body]: 1
       });
       const outputs = [...plcOutput];
@@ -70,7 +78,7 @@ function App() {
       setPlcOutput([...outputs]);
   }
   const triggerLock = async (lock: 'top'|'bottom',body: string)=>{
-    const res = await axios.post(`http://localhost:5000/lock${lock}`,{
+    const res = await axios.post(`http://${binTarget}/lock${lock}`,{
         [body]: 1
     });
     const outputs = [...plcOutput];
@@ -93,6 +101,7 @@ function App() {
             <fieldset className="border  rounded-md bg-gray-100  border-solid p-3">
               <legend className="text-sm">{b.name}</legend>
               <div className=' grid grid-flow-row grid-cols-2 gap-4'>
+                <input type='text' onBlur={(e)=>setBinTarget(e.target.value)} className='p-3 border rounded-md col-span-2' placeholder='Bin IP/Hostname'/>
                 <button type='button' onClick={()=>triggerLock('top','idLockTop')} className='p-2 rounded-md bg-blue-400 text-white'>TOP LOCK</button>
                 <button type='button' onClick={()=>triggerLock('bottom','idLockBottom')} className='p-2 rounded-md bg-orange-400 text-white'>BOTTOM LOCK</button>
                 <button type='button' onClick={()=>triggerLamp('red','on','idLockTop')} className='p-2 rounded-md bg-red-800 text-white'>RED LAMP ON</button>
